@@ -3,9 +3,6 @@ FROM python:3.11-slim
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_DEBUG=True
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
 
 WORKDIR /code
 COPY requirements.txt /code/

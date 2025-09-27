@@ -4,11 +4,11 @@ services:
     image: postgres:15
     env_file: .env
     ports:
-      - "5433:5432"   # host:container
+      - "5433:5432"   # host:container (remove if not needed externally)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      test: ["CMD", "pg_isready", "-U", "vinny"]
       interval: 10s
       timeout: 5s
       retries: 5
