@@ -5,64 +5,64 @@ from .models import Poll, Choice, Vote
 
 # 1. Choice Serializer
 class ChoiceSerializer(serializers.ModelSerializer):
-    votes = serializers.IntegerField(source="vote_set.count", read_only=True)
+    votes = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Choice
-        fields = ["id", "text", "votes"]
-
+        fields = ('id', 'text', 'votes')
 
 # 2. Poll Serializer (for reads)
 class PollSerializer(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True, read_only=True)
+    created_by = serializers.ReadOnlyField(source='created_by.username')
 
     class Meta:
         model = Poll
-        fields = ["id", "question", "created_at", "expires_at", "choices"]
-
+        fields = ('id', 'title', 'description', 'created_by', 'created_at', 'expires_at', 'is_active', 'choices')
 
 # 3. Poll Create Serializer (for writes)
 class PollCreateSerializer(serializers.ModelSerializer):
-    choices = serializers.ListField(
-        child=serializers.CharField(max_length=200), write_only=True
-    )
+    choices = serializers.ListField(child=serializers.CharField(max_length=255), write_only=True)
 
     class Meta:
         model = Poll
-        fields = ["id", "question", "expires_at", "choices"]
+        fields = ('title', 'description', 'expires_at', 'is_active', 'choices')
 
     def create(self, validated_data):
-        choices_data = validated_data.pop("choices")
-        poll = Poll.objects.create(**validated_data)
-        for choice_text in choices_data:
-            Choice.objects.create(poll=poll, text=choice_text)
+        choices_data = validated_data.pop('choices', [])
+        user = self.context['request'].user
+        poll = Poll.objects.create(created_by=user, **validated_data)
+        choices_objs = [Choice(poll=poll, text=text) for text in choices_data]
+        Choice.objects.bulk_create(choices_objs)
         return poll
-
 
 # 4. Vote Serializer (with validation)
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = ["id", "poll", "choice", "user"]
-
-        # user will be set automatically, not passed from client
-        extra_kwargs = {"user": {"read_only": True}}
+        fields = ('id', 'poll', 'choice')
 
     def validate(self, data):
-        user = self.context["request"].user
-        poll = data.get("poll")
-
-        # prevent duplicate vote
+        request = self.context['request']
+        user = request.user
+        poll = data.get('poll')
+        if not poll:
+            raise serializers.ValidationError('Poll is required.')
+        # check user already voted
         if Vote.objects.filter(poll=poll, user=user).exists():
-            raise serializers.ValidationError("You have already voted on this poll")
-
-        # prevent expired polls
+            raise serializers.ValidationError('You have already voted on this poll.')
+        # check poll expired
         if poll.expires_at and poll.expires_at < timezone.now():
-            raise serializers.ValidationError("Poll has expired")
-
+            raise serializers.ValidationError('Poll has expired.')
+        # ensure the choice belongs to the poll
+        choice = data.get('choice')
+        if choice.poll_id != poll.id:
+            raise serializers.ValidationError('Choice does not belong to the given poll.')
         return data
 
     def create(self, validated_data):
-        # attach current user automatically
-        validated_data["user"] = self.context["request"].user
-        return super().create(validated_data)
+        user = self.context['request'].user
+        vote = Vote.objects.create(user=user, **validated_data)
+        return vote
+
+

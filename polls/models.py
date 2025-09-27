@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 
-# Create your models here.
 class Poll(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -12,7 +11,13 @@ class Poll(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        indexes = [models.Index(fields=['created_at']), models.Index(fields=['is_active'])]
+        indexes = [
+            models.Index(fields=['created_at']),
+            models.Index(fields=['is_active']),
+        ]
+
+    def __str__(self):
+        return self.title
 
 class Choice(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='choices')
@@ -20,6 +25,9 @@ class Choice(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=['poll'])]
+
+    def __str__(self):
+        return f"{self.text} ({self.poll_id})"
 
 class Vote(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='votes')
@@ -30,3 +38,6 @@ class Vote(models.Model):
     class Meta:
         unique_together = ('poll', 'user')
         indexes = [models.Index(fields=['poll', 'user'])]
+
+    def __str__(self):
+        return f"{self.user_id} -> {self.choice_id} (poll {self.poll_id})"
