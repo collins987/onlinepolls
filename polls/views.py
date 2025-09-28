@@ -31,9 +31,20 @@ class PollViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], url_path='results')
     def results(self, request, pk=None):
+        """
+        Custom endpoint: GET /api/polls/{id}/results/
+        Returns poll title and votes count per choice.
+        """
         poll = self.get_object()
-        choices = poll.choices.annotate(votes=Count('votes')).values('id', 'text', 'votes')
-        return Response({'id': poll.id, 'title': poll.title, 'results': list(choices)})
+        choices = Choice.objects.filter(poll=poll).annotate(vote_count=Count('votes'))
+        results = [
+            {"id": c.id, "choice": c.text, "votes": c.vote_count}
+            for c in choices
+        ]
+        return Response(
+            {"poll": poll.title, "results": results},
+            status=status.HTTP_200_OK
+        )
 
 class VoteCreateAPIView(generics.CreateAPIView):
     serializer_class = VoteSerializer
