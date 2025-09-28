@@ -30,7 +30,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', 'dev-secret-change-me')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = ['onlinepolls.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
