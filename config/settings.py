@@ -25,7 +25,7 @@ def env(key, default=None):
     return os.environ.get(key, default)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('django-insecure-2wiihb+^t50#ohj9^9is6q&_nug^cd__qxf%!s)b=9air=dmbp', 'dev-secret-change-me')
+SECRET_KEY = env('DJANGO_SECRET_KEY', 'dev-secret-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
@@ -84,7 +84,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DB', 'onlinepolls'),
-        'USER': env('POSTGRES_USER', 'vinny'),      # default matches .env
+        'USER': env('POSTGRES_USER', 'collo'),      # default matches .env
         'PASSWORD': env('POSTGRES_PASSWORD', '0987'),
         # inside docker-compose, Django connects to "db"
         # outside docker (host), override POSTGRES_HOST=localhost
