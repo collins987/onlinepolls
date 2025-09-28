@@ -63,4 +63,3 @@ http://127.0.0.1:8000/api/docs/
 👨‍💻 Author
 Project Nexus – Online Polls System
 Built as part of a Django Backend Pro Dev Capstone Project.
-Would you like me to also include a "Testing with Pytest" section in this README so that running one command (pytest) checks all endpoints automatically? That way you won’t rely only on curl/manual tests.
