@@ -5,7 +5,7 @@ from django.db.models import Count
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 from .models import Poll, Choice, Vote
-from .serializers import PollSerializer, PollCreateSerializer, VoteSerializer, ChoiceSerializer
+from .serializers import PollSerializer, PollCreateSerializer, VoteSerializer
 
 class PollViewSet(viewsets.ModelViewSet):
     queryset = Poll.objects.all().select_related('created_by').prefetch_related('choices')
@@ -33,7 +33,6 @@ class PollViewSet(viewsets.ModelViewSet):
     def results(self, request, pk=None):
         """
         Custom endpoint: GET /api/polls/{id}/results/
-        Returns poll title and votes count per choice.
         """
         poll = self.get_object()
         choices = Choice.objects.filter(poll=poll).annotate(vote_count=Count('votes'))
