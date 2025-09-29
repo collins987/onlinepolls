@@ -6,6 +6,10 @@ from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 from .models import Poll, Choice, Vote
 from .serializers import PollSerializer, PollCreateSerializer, VoteSerializer
+from django.shortcuts import render
+
+def landing(request):
+    return render(request, 'landing.html')
 
 class PollViewSet(viewsets.ModelViewSet):
     queryset = Poll.objects.all().select_related('created_by').prefetch_related('choices')
