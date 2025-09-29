@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 
@@ -78,19 +79,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB', 'onlinepolls'),
-        'USER': env('POSTGRES_USER', 'collo'),      # default matches .env
-        'PASSWORD': env('POSTGRES_PASSWORD', '0987'),
-        # inside docker-compose, Django connects to "db"
-        # outside docker (host), override POSTGRES_HOST=localhost
-        'HOST': env('POSTGRES_HOST', 'db'),
-        'PORT': env('POSTGRES_PORT', '5432'),
-    }
+    "default": dj_database_url.config(
+        default="postgres://collo:0987@localhost:5432/onlinepolls",  # fallback for local dev
+        conn_max_age=600,
+        ssl_require=False if DEBUG else True,
+    )
 }
 
 
