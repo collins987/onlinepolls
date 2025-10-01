@@ -81,12 +81,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     "default": dj_database_url.config(
-        default="postgres://collo:0987@localhost:5432/onlinepolls",  # fallback for local dev
+        default=os.getenv("DATABASE_URL", "postgres://collo:0987@localhost:5432/onlinepolls"),
         conn_max_age=600,
-        ssl_require=False if DEBUG else True,
+        ssl_require=not os.getenv("DJANGO_DEBUG", "False").lower() in ["true", "1"],
     )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
