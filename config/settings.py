@@ -29,7 +29,7 @@ def env(key, default=None):
 SECRET_KEY = env('DJANGO_SECRET_KEY', 'dev-secret-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes')
+DEBUG = env('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = ['onlinepolls.onrender.com', '127.0.0.1', 'localhost']
 
@@ -164,11 +164,8 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    # Longer token lifetime in development for easier testing
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24) if not IS_PRODUCTION else timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(env('SIMPLE_JWT_ACCESS_MINUTES', 60))),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,  # Get a new refresh token when refreshing access token
-    'UPDATE_LAST_LOGIN': True,  # Update last login when token is created
 }
 
 # drf-yasg settings (minimal)
