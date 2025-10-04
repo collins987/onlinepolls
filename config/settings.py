@@ -29,7 +29,7 @@ def env(key, default=None):
 SECRET_KEY = env('DJANGO_SECRET_KEY', 'dev-secret-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
+DEBUG = env('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = ['onlinepolls.onrender.com', '127.0.0.1', 'localhost']
 
@@ -80,20 +80,33 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Determine if we're running in production (Render) or locally
-IS_PRODUCTION = not DEBUG
+# Database configuration
+IS_PRODUCTION = env('IS_PRODUCTION', 'False').lower() in ('true', '1', 'yes')
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgres://collo:0987@db:5432/onlinepolls"),
-        conn_max_age=600,
-        ssl_require=IS_PRODUCTION,  # require SSL only in prod
-    )
-}
-
-# For local Docker (DEBUG=True), explicitly disable SSL mode
-if not IS_PRODUCTION:
-    DATABASES["default"]["OPTIONS"] = {"sslmode": "disable"}
+if IS_PRODUCTION:
+    # Production settings (Render)
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True,  # Require SSL in production
+        )
+    }
+else:
+    # Local development settings (Docker)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'onlinepolls'),
+            'USER': os.getenv('POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+            'HOST': os.getenv('POSTGRES_HOST', 'db'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'disable',  # Explicitly disable SSL for local development
+            },
+        }
+    }
 
 
 # Password validation
@@ -151,8 +164,11 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(env('SIMPLE_JWT_ACCESS_MINUTES', 60))),
+    # Longer token lifetime in development for easier testing
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24) if not IS_PRODUCTION else timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,  # Get a new refresh token when refreshing access token
+    'UPDATE_LAST_LOGIN': True,  # Update last login when token is created
 }
 
 # drf-yasg settings (minimal)
