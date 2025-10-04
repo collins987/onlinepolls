@@ -79,13 +79,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# Determine if we're running in production (Render) or locally
+IS_PRODUCTION = not DEBUG
+
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgres://collo:0987@localhost:5432/onlinepolls"),
+        default=os.getenv("DATABASE_URL", "postgres://collo:0987@db:5432/onlinepolls"),
         conn_max_age=600,
-        ssl_require=not os.getenv("DJANGO_DEBUG", "False").lower() in ["true", "1"],
+        ssl_require=IS_PRODUCTION,  # require SSL only in prod
     )
 }
+
+# For local Docker (DEBUG=True), explicitly disable SSL mode
+if not IS_PRODUCTION:
+    DATABASES["default"]["OPTIONS"] = {"sslmode": "disable"}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

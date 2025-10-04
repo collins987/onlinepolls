@@ -30,10 +30,16 @@ git clone https://github.com/collins987/online-poll-system.git
 cd online-poll-system
 ```
 
-2. Create environment variables
+2. Create and activate a virtual environment
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+```
+
+3. Create environment variables
 Create a `.env` file at the project root:
 ```env
-SECRET_KEY=your_django_secret_key
+SECRET_KEY=your secret key
 DEBUG=True
 POSTGRES_DB=onlinepolls
 POSTGRES_USER=postgres
@@ -44,10 +50,10 @@ POSTGRES_PORT=5432
 
 👉 Generate your own SECRET_KEY:
 ```bash
-python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-3. Run with Docker
+4. Run with Docker
 ```bash
 docker-compose up --build
 ```
@@ -57,11 +63,20 @@ Your services will be available at:
 * Swagger UI → http://127.0.0.1:8000/api/docs/
 * Django Admin → http://127.0.0.1:8000/admin/
 
-4. Create superuser
+5. Create superuser
 In another terminal:
 ```bash
 docker-compose exec web python manage.py createsuperuser
 ```
+You'll be prompted to enter:
+* Username (e.g., "admin")
+* Email address (optional, can be left blank)
+* Password (create a strong password with at least 8 characters)
+
+Note: Make sure to remember these credentials as you'll need them to:
+* Access the Django admin interface
+* Generate JWT tokens for API authentication
+* Create and manage polls
 
 🚀 Deploying to Render
 1. Create a new Web Service on Render
@@ -87,24 +102,59 @@ docker-compose exec web python manage.py createsuperuser
    * Run migrations
    * Collect static files
    * Start the Gunicorn server
-🔑 Authentication
-Before accessing protected endpoints, obtain a JWT:
-curl -X POST http://127.0.0.1:8000/api/auth/token/ \ -H "Content-Type: application/json" \ -d '{"username": "admin", "password": "yourpassword"}' 
-Response:
-{ "refresh": "eyJ0eXAiOiJKV1Qi...", "access": "eyJ0eXAiOiJKV1Qi..." } 
-Use the access token in headers:
-Authorization: Bearer <access-token> 
-📖 Usage Examples
-1. Create a poll with choices
-curl -X POST http://127.0.0.1:8000/api/polls/ \ -H "Authorization: Bearer <token>" \ -H "Content-Type: application/json" \ -d '{ "title": "Best programming language?", "description": "Vote your favorite", "choices": ["Python", "JavaScript", "Go"], "is_active": true }' 
+🔑 Authentication and API Usage
+Note: Replace the base URL in these examples:
+- Local testing: use `http://127.0.0.1:8000`
+- Render deployment: use `https://my-app-name.onrender.com`
+
+1. First, obtain a JWT token using your superuser credentials:
+```bash
+# Use the superuser credentials you created earlier
+curl -X POST http://127.0.0.1:8000/api/auth/token/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "my_superuser_password"}'
+```
 ✅ Response:
-{ "id": 1, "title": "Best programming language?", "choices": [ {"id": 1, "text": "Python", "votes": 0}, {"id": 2, "text": "JavaScript", "votes": 0}, {"id": 3, "text": "Go", "votes": 0} ] } 
-2. List all polls
-curl -X GET http://127.0.0.1:8000/api/polls/ 
-3. Vote on a poll
-curl -X POST http://127.0.0.1:8000/api/vote/ \ -H "Authorization: Bearer <token>" \ -H "Content-Type: application/json" \ -d '{"poll": 1, "choice": 2}' 
-4. Get poll results
-curl -X GET http://127.0.0.1:8000/api/polls/1/results/ 
+```json
+{
+    "refresh": "eyJ0eXAiOiJKV1Qi...",
+    "access": "eyJ0eXAiOiJKV1Qi..."
+}
+```
+Save the `access` token for subsequent requests.
+
+📖 Usage Examples
+
+2. Create a poll with choices (requires authentication)
+```bash
+curl -X POST http://127.0.0.1:8000/api/polls/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Best programming language?",
+    "description": "Vote your favorite",
+    "choices": ["Python", "JavaScript", "Go"],
+    "is_active": true
+  }'
+```
+
+3. List all polls (public endpoint, no authentication required)
+```bash
+curl -X GET http://127.0.0.1:8000/api/polls/
+```
+
+4. Vote on a poll (requires authentication)
+```bash
+curl -X POST http://127.0.0.1:8000/api/vote/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "Content-Type: application/json" \
+  -d '{"poll": 1, "choice": 2}'
+```
+
+5. Get poll results (public endpoint, no authentication required)
+```bash
+curl -X GET http://127.0.0.1:8000/api/polls/1/results/
+``` 
 ✅ Response:
 { "poll": "Best programming language?", "results": [ {"id": 1, "choice": "Python", "votes": 0}, {"id": 2, "choice": "JavaScript", "votes": 1}, {"id": 3, "choice": "Go", "votes": 0} ] } 
 📚 API Docs
