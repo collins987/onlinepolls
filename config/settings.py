@@ -29,15 +29,11 @@ def env(key, default=None):
 SECRET_KEY = env('DJANGO_SECRET_KEY', 'dev-secret-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
+DEBUG = env('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes')
 
-# Allow your render domain and local development URLs
-ALLOWED_HOSTS = [
-    'project-nexus-613g.onrender.com',  #My Render domain
-    '.onrender.com',                    # All subdomains of render.com
-    'localhost',
-    '127.0.0.1',
-]
+# Get allowed hosts from environment variable or use defaults
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS += ['project-nexus-613g.onrender.com', '.onrender.com']
 
 
 # Application definition
@@ -172,6 +168,19 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(env('SIMPLE_JWT_ACCESS_MINUTES', 60))),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
+# Security and CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://project-nexus-613g.onrender.com',
+    'https://*.onrender.com',
+]
+
+if IS_PRODUCTION:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 }
 
 # CSRF Settings
