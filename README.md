@@ -146,9 +146,29 @@ docker-compose exec web python manage.py shell -c "from django.contrib.auth.mode
    * You should see DATABASE_URL listed with a masked value
    * Redeploy your web service to apply the changes
 
-5. Deploy! Render will automatically:
+5. Configure Superuser (Important Security Step):
+   By default, a superuser account is created during deployment with:
+   * Username: `admin`
+   * Password: `admin123`
+   * Email: `admin@example.com`
+
+   For security, you should either:
+   a) Change the password immediately after first login, or
+   b) Set custom superuser credentials before deployment:
+      * Go to your web service dashboard
+      * Click "Environment" tab
+      * Add these variables:
+      ```
+      DJANGO_SUPERUSER_USERNAME=your_chosen_username
+      DJANGO_SUPERUSER_PASSWORD=your_secure_password
+      DJANGO_SUPERUSER_EMAIL=your_email@domain.com
+      ```
+      * Redeploy to create superuser with these credentials
+
+6. Deploy! Render will automatically:
    * Install dependencies from requirements.txt
    * Run migrations
+   * Create superuser
    * Collect static files
    * Start the Gunicorn server
 🔑 Authentication and API Usage
