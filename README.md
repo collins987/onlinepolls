@@ -78,20 +78,41 @@ Note: Make sure to remember these credentials as you'll need them to:
 * Generate JWT tokens for API authentication
 * Create and manage polls
 
+You can verify the superuser was created by checking again:
+docker-compose exec web python manage.py shell -c "from django.contrib.auth.models import User; print('Superusers:', [user.username for user in User.objects.filter(is_superuser=True)])"
+
+
 🚀 Deploying to Render
-1. Create a new Web Service on Render
-2. Connect your GitHub repository
-3. Configure the following settings:
-   * Build Command: `./build.sh`
+1. Create a new Web Service on Render:
+   * Click "New +" button
+   * Select "Web Service" (important: not Static Site)
+   * Connect your GitHub repository if not already connected
+   * Select your repository from the list
+
+2. On the "Create Web Service" page:
+   * Enter a name for your service (e.g., "project-nexus")
+   * Under "Environment" section:
+     - Look for Environment selection (radio buttons/dropdown)
+     - Choose "Python" (NOT "Docker" or other options)
+   * Select Branch: `master`
+   * Leave Root Directory empty
+
+3. Build & Deploy settings:
+   * Build Command: `./build.sh`  # Will appear after selecting Python environment
    * Start Command: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT`
-   * Environment Variables:
-     ```
-     SECRET_KEY=your-secure-secret-key
-     DEBUG=False
-     DATABASE_URL=postgres://your-render-postgres-url
-     ALLOWED_HOSTS=.onrender.com,your-custom-domain
-     CSRF_TRUSTED_ORIGINS=https://*.onrender.com,https://*.your-custom-domain
-     ```
+   * Set Auto-Deploy to On
+
+4. Configure Environment Variables:
+   ```
+   SECRET_KEY=your-secure-secret-key
+   DEBUG=False
+   DATABASE_URL=postgres://your-render-postgres-url
+   ALLOWED_HOSTS=.onrender.com,your-custom-domain
+   CSRF_TRUSTED_ORIGINS=https://*.onrender.com,https://*.your-custom-domain
+   ```
+
+   Note: Replace `your-custom-domain` with your actual domain if you have one.
+   The DATABASE_URL will be automatically added when you create and link a PostgreSQL service.
 
 4. Create a PostgreSQL database service on Render
    * Link it to your web service

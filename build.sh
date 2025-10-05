@@ -11,5 +11,8 @@ python manage.py migrate
 # Collect static files
 python manage.py collectstatic --no-input
 
+# Collect static files
+python manage.py collectstatic --no-input
+
 # Create superuser using custom management command
 python manage.py createsu
