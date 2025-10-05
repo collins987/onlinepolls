@@ -114,9 +114,37 @@ docker-compose exec web python manage.py shell -c "from django.contrib.auth.mode
    Note: Replace `your-custom-domain` with your actual domain if you have one.
    The DATABASE_URL will be automatically added when you create and link a PostgreSQL service.
 
-4. Create a PostgreSQL database service on Render
-   * Link it to your web service
-   * The DATABASE_URL will be automatically added to your environment
+4. Create and Link PostgreSQL Database:
+   * Go to the Render Dashboard
+   * Click "New +" and select "PostgreSQL"
+   * Choose a name (e.g., "project-nexus-db")
+   * Select your preferred region
+   * Choose your database plan
+   * Click "Create Database"
+   
+   To link it to your web service:
+   1. Copy the Internal Database URL:
+      * Go to your PostgreSQL database's "Connections" tab
+      * Click the "Reveal" button next to "Internal Database URL"
+      * Copy the revealed URL (it starts with postgres://)
+   
+   2. Add it to your web service:
+      * Go back to your web service dashboard
+      * Click "Environment" tab
+      * Click "Add Environment Variable"
+      * Set Key as: DATABASE_URL
+      * Paste the Internal Database URL as the Value
+      * Click "Save Changes"
+   
+   Important: Always use the Internal Database URL (not External) because:
+   * It's optimized for service-to-service communication within Render
+   * Provides better security and performance
+   * Automatically handles internal routing
+   
+   To verify the connection:
+   * Go to your web service's "Environment" tab
+   * You should see DATABASE_URL listed with a masked value
+   * Redeploy your web service to apply the changes
 
 5. Deploy! Render will automatically:
    * Install dependencies from requirements.txt
