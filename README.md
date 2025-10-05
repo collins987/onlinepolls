@@ -26,8 +26,8 @@ This project allows users to:
 📦 Local Development Setup
 1. Clone the repository
 ```bash
-git clone https://github.com/collins987/online-poll-system.git
-cd online-poll-system
+git clone https://github.com/collins987/onlinepolls.git
+cd onlinepolls
 ```
 
 2. Create and activate a virtual environment
@@ -104,11 +104,12 @@ docker-compose exec web python manage.py shell -c "from django.contrib.auth.mode
 
 4. Configure Environment Variables:
    ```
-   SECRET_KEY=oo+cyo392vt5(k4*oz(gc8f!^x6eih_q%j9hmn%$+04tm_$h*&
-   DEBUG=False
+   SECRET_KEY=your secret key
+   DJANGO_DEBUG=False
    DATABASE_URL=postgres://your-render-postgres-url
    ALLOWED_HOSTS=.onrender.com,your-custom-domain
    CSRF_TRUSTED_ORIGINS=https://*.onrender.com,http://127.0.0.1:8000
+   IS_PRODUCTION=True
    ```
 
    Note: Replace `your-custom-domain` with your actual domain if you have one.
