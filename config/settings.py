@@ -31,7 +31,13 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', 'dev-secret-change-me')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = ['onlinepolls.onrender.com', '127.0.0.1', 'localhost']
+# Allow your render domain and local development URLs
+ALLOWED_HOSTS = [
+    'project-nexus-613g.onrender.com',  #My Render domain
+    '.onrender.com',                    # All subdomains of render.com
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -167,6 +173,19 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(env('SIMPLE_JWT_ACCESS_MINUTES', 60))),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://project-nexus-613g.onrender.com',
+    'https://*.onrender.com',
+]
+
+# Security Settings for Production
+if IS_PRODUCTION:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # drf-yasg settings (minimal)
 SWAGGER_SETTINGS = {
